@@ -9,6 +9,8 @@ import Root, {
   action as rootAction,
 } from "./routes/root";
 import EditContact, { action as editAction } from "./routes/edit";
+import { action as destroyAction } from "./routes/destroy";
+import Index from "./routes/index";
 
 const router = createHashRouter([
   {
@@ -18,6 +20,7 @@ const router = createHashRouter([
     loader: rootLoader,
     action: rootAction,
     children: [
+      { index: true, element: <Index /> },
       {
         path: "contacts/:contactId",
         element: <Contact />,
@@ -28,6 +31,11 @@ const router = createHashRouter([
         element: <EditContact />,
         loader: contactLoader,
         action: editAction,
+      },
+      {
+        path: "contacts/:contactId/destroy",
+        action: destroyAction,
+        errorElement: <div>Oops! There was an error.</div>,
       },
     ],
   },
