@@ -6,8 +6,10 @@ import {
   Form,
   useNavigation,
   redirect,
+  useSubmit,
 } from "react-router-dom";
 import { getContacts, createContact } from "../contacts";
+import { useEffect } from "react";
 
 export async function action() {
   const contact = await createContact();
@@ -16,14 +18,24 @@ export async function action() {
 
 export async function loader({ request }) {
   const url = new URL(request.url);
-  const q = url.searchParams.get("q")
+  const q = url.searchParams.get("q");
   const contacts = await getContacts(q);
-  return { contacts };
+  return { contacts, q };
 }
 
 export default function Root() {
   const navigation = useNavigation();
-  const { contacts } = useLoaderData();
+  const { contacts, q } = useLoaderData();
+  const submit = useSubmit();
+
+  const searching =
+    navigation.location &&
+    new URLSearchParams(navigation.location.search).has("q");
+
+  useEffect(() => {
+    document.getElementById("q").value = q;
+  }, [q]);
+
   return (
     <>
       <div id="sidebar">
@@ -33,11 +45,16 @@ export default function Root() {
             <input
               id="q"
               aria-label="Search contacts"
+              className={searching ? "loading" : ""}
               placeholder="Search"
               type="search"
               name="q"
+              defaultValue={q}
+              onChange={(event) => {
+                submit(event.currentTarget.form);
+              }}
             />
-            <div id="search-spinner" aria-hidden hidden={true} />
+            <div id="search-spinner" aria-hidden hidden={!searching} />
             <div className="sr-only" aria-live="polite"></div>
           </Form>
           <Form method="post">
